@@ -143,7 +143,7 @@
         .score-item { text-align: center; }
 
         .score-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             letter-spacing: 0.25em;
             text-transform: uppercase;
             color: rgba(245,239,230,0.4);
@@ -311,44 +311,134 @@
             background: rgba(245,239,230,0.04);
         }
 
-        /* Activity section */
-        .activity-section {
+        /* Activity feed */
+        .activity {
             width: 100%;
             max-width: 480px;
-            margin-top: 80px;
-            animation: fadeIn 1.2s 0.6s ease both;
+            margin-top: 32px;
+            animation: fadeUp 0.8s 0.5s ease both;
         }
 
         .activity-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            color: var(--gold);
-            font-style: italic;
-            margin-bottom: 24px;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(245,239,230,0.25);
+            margin-bottom: 16px;
+            font-family: 'DM Mono', monospace;
+            padding-left: 4px;
             text-align: center;
         }
 
-        .activity-list { list-style: none; }
+        .activity-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
         .activity-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid rgba(245,239,230,0.05);
-            font-size: 1.05rem;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(45,26,14,0.4);
+            border: 1px solid rgba(200,133,74,0.07);
+            border-radius: 12px;
+            animation: slideIn 0.4s cubic-bezier(0.34,1.2,0.64,1) both;
         }
 
-        .time {
+        .activity-item.pass {
+            opacity: 0.5;
+            border-color: rgba(245,239,230,0.04);
+        }
+
+        .activity-time {
             font-family: 'DM Mono', monospace;
-            font-size: 0.75rem;
-            color: rgba(245,239,230,0.3);
+            font-size: 0.7rem;
+            color: rgba(245,239,230,0.2);
+            font-weight: 300;
+            min-width: 44px;
         }
 
-        .msg { color: var(--foam); }
-        .msg strong { color: var(--gold); }
+        .activity-text {
+            font-size: 0.9rem;
+            color: rgba(245,239,230,0.55);
+            font-weight: 300;
+        }
 
-        /* Animations */
+        .activity-text strong {
+            color: var(--caramel);
+            font-weight: 500;
+        }
+
+        .tag-cups {
+            margin-left: auto;
+            background: rgba(200,133,74,0.12);
+            border: 1px solid rgba(200,133,74,0.2);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--caramel);
+        }
+
+        /* Validity bar */
+        .validity {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeIn 1s 0.6s ease both;
+        }
+
+        .validity-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            font-family: 'DM Mono', monospace;
+            color: rgba(245,239,230,0.2);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .validity-bar-bg {
+            height: 2px;
+            background: rgba(245,239,230,0.06);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .validity-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--caramel), var(--gold));
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(45,26,14,0.95);
+            border: 1px solid rgba(200,133,74,0.3);
+            border-radius: 16px;
+            padding: 14px 24px;
+            color: var(--cream);
+            font-size: 0.9rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.4s cubic-bezier(0.34,1.2,0.64,1);
+            z-index: 200;
+            white-space: nowrap;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -358,6 +448,11 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -366,28 +461,28 @@
             <div class="steam"></div>
             <div class="steam"></div>
             <div class="steam"></div>
-            <div class="cup-icon">☕</div>
         </div>
+        <div class="cup-icon">☕</div>
 
-        <h1>La Ronda del <em>Café</em></h1>
-        <p class="subtitle">Sincronía & Cafeína</p>
+        <h1>La <em>Ronda</em> del Café</h1>
+        <p class="subtitle">Votos válidos por 24 horas</p>
 
         <div class="divider"></div>
 
         <div class="scoreboard">
             <div class="score-item">
-                <span class="score-label">Tazas</span>
-                <span class="score-number tazas">{{ votes.si }}</span>
+                <div class="score-label">Tazas</div>
+                <div class="score-number tazas" id="score-tazas">{{ votes.si }}</div>
             </div>
-            <div class="score-sep">/</div>
+            <div class="score-sep">·</div>
             <div class="score-item">
-                <span class="score-label">Pasan</span>
-                <span class="score-number pasan">{{ votes.no }}</span>
+                <div class="score-label">Pasan</div>
+                <div class="score-number pasan" id="score-pasan">{{ votes.no }}</div>
             </div>
         </div>
 
         <div class="card">
-            <p class="question">¿Cuántas dosis?</p>
+            <div class="question">¿Cuántas tazas quieres?</div>
             <form action="/vote" method="POST">
                 <div class="input-row">
                     <button type="button" class="qty-btn" onclick="const input = document.getElementById('cups'); input.value = Math.max(1, parseInt(input.value) - 1);">−</button>
@@ -401,19 +496,22 @@
             </form>
         </div>
 
-        <div class="activity-section">
-            <h3 class="activity-title">Recientemente en la barra...</h3>
+        <div class="activity">
+            <div class="activity-title">Recientemente en la barra...</div>
             <ul class="activity-list">
                 {% for voter in votes.voters[::-1][:15] %}
-                <li class="activity-item">
-                    <span class="msg">
+                <li class="activity-item {% if voter.choice == 'no' %}pass{% endif %}">
+                    <span class="activity-time">{{ voter.time }}</span>
+                    <span class="activity-text">
                         {% if voter.choice == 'si' %}
                         Sirviendo <strong>{{ voter.cups }}</strong> {{ 'taza' if voter.cups == 1 else 'tazas' }}
                         {% else %}
                         Declinó la ronda
                         {% endif %}
                     </span>
-                    <span class="time">{{ voter.time }}</span>
+                    {% if voter.choice == 'si' %}
+                    <span class="tag-cups">{{ voter.cups }}</span>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
