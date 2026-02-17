@@ -26,7 +26,6 @@
             position: relative;
         }
 
-        /* Grain texture overlay */
         body::before {
             content: '';
             position: fixed;
@@ -37,7 +36,6 @@
             opacity: 0.35;
         }
 
-        /* Warm radial background */
         body::after {
             content: '';
             position: fixed;
@@ -56,7 +54,6 @@
             padding: 60px 20px 80px;
         }
 
-        /* Steam animation */
         .steam-container {
             position: relative;
             margin-bottom: 8px;
@@ -121,7 +118,6 @@
             animation: fadeUp 0.8s 0.1s ease both;
         }
 
-        /* Divider */
         .divider {
             width: 100%;
             max-width: 480px;
@@ -131,7 +127,6 @@
             animation: fadeIn 1s 0.3s ease both;
         }
 
-        /* Score board */
         .scoreboard {
             display: flex;
             align-items: center;
@@ -143,7 +138,7 @@
         .score-item { text-align: center; }
 
         .score-label {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             letter-spacing: 0.25em;
             text-transform: uppercase;
             color: rgba(245,239,230,0.4);
@@ -171,7 +166,6 @@
             margin-top: -12px;
         }
 
-        /* Card */
         .card {
             width: 100%;
             max-width: 480px;
@@ -195,7 +189,6 @@
             text-align: center;
         }
 
-        /* Number input */
         .input-row {
             display: flex;
             align-items: center;
@@ -239,7 +232,7 @@
             border-radius: 14px;
             padding: 12px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, transform 0.15s;
             -moz-appearance: textfield;
         }
 
@@ -250,7 +243,6 @@
 
         .qty-display:focus { border-color: rgba(200,133,74,0.5); }
 
-        /* Buttons */
         .btn-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -287,8 +279,6 @@
             box-shadow: 0 12px 32px rgba(200,133,74,0.45);
         }
 
-        .btn-yes:active { transform: translateY(0); }
-
         .btn-no {
             padding: 16px;
             background: transparent;
@@ -311,7 +301,40 @@
             background: rgba(245,239,230,0.04);
         }
 
-        /* Activity feed */
+        .validity {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeIn 1s 0.6s ease both;
+        }
+
+        .validity-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            font-family: 'DM Mono', monospace;
+            color: rgba(245,239,230,0.2);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .validity-bar-bg {
+            height: 2px;
+            background: rgba(245,239,230,0.06);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .validity-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--caramel), var(--gold));
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+
         .activity {
             width: 100%;
             max-width: 480px;
@@ -383,42 +406,6 @@
             color: var(--caramel);
         }
 
-        /* Validity bar */
-        .validity {
-            width: 100%;
-            max-width: 480px;
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            animation: fadeIn 1s 0.6s ease both;
-        }
-
-        .validity-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.65rem;
-            font-family: 'DM Mono', monospace;
-            color: rgba(245,239,230,0.2);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-        }
-
-        .validity-bar-bg {
-            height: 2px;
-            background: rgba(245,239,230,0.06);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .validity-bar-fill {
-            height: 100%;
-            background: linear-gradient(to right, var(--caramel), var(--gold));
-            border-radius: 2px;
-            transition: width 1s linear;
-        }
-
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 32px;
@@ -483,22 +470,32 @@
 
         <div class="card">
             <div class="question">¿Cuántas tazas quieres?</div>
-            <form action="/vote" method="POST">
+            <form id="vote-form" onsubmit="submitVote(event)">
                 <div class="input-row">
-                    <button type="button" class="qty-btn" onclick="const input = document.getElementById('cups'); input.value = Math.max(1, parseInt(input.value) - 1);">−</button>
-                    <input type="number" id="cups" name="cups" value="1" min="1" max="10" class="qty-display">
-                    <button type="button" class="qty-btn" onclick="const input = document.getElementById('cups'); input.value = Math.min(10, parseInt(input.value) + 1);">+</button>
+                    <button type="button" class="qty-btn" onclick="adjustQty(-1)">−</button>
+                    <input class="qty-display" id="qty" type="number" value="1" min="1" max="9">
+                    <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
                 </div>
                 <div class="btn-row">
-                    <button type="submit" name="choice" value="si" class="btn-yes">¡Pedir!</button>
-                    <button type="submit" name="choice" value="no" class="btn-no">Paso...</button>
+                    <button type="button" class="btn-yes" onclick="submitVoteDirect('si')">¡Marchando! ☕</button>
+                    <button type="button" class="btn-no" onclick="submitVoteDirect('no')">Hoy no...</button>
                 </div>
             </form>
         </div>
 
+        <div class="validity">
+            <div class="validity-label">
+                <span>Validez de los votos</span>
+                <span id="validity-text">Calculando...</span>
+            </div>
+            <div class="validity-bar-bg">
+                <div class="validity-bar-fill" id="validity-bar" style="width:100%"></div>
+            </div>
+        </div>
+
         <div class="activity">
-            <div class="activity-title">Recientemente en la barra...</div>
-            <ul class="activity-list">
+            <div class="activity-title">Actividad reciente</div>
+            <ul class="activity-list" id="activity-list">
                 {% for voter in votes.voters[::-1][:15] %}
                 <li class="activity-item {% if voter.choice == 'no' %}pass{% endif %}">
                     <span class="activity-time">{{ voter.time }}</span>
@@ -510,12 +507,78 @@
                         {% endif %}
                     </span>
                     {% if voter.choice == 'si' %}
-                    <span class="tag-cups">{{ voter.cups }}</span>
+                    <span class="tag-cups">+{{ voter.cups }}</span>
                     {% endif %}
                 </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function adjustQty(d) {
+            const inp = document.getElementById('qty');
+            const v = Math.max(1, Math.min(9, parseInt(inp.value || 1) + d));
+            inp.value = v;
+            inp.style.transform = 'scale(1.1)';
+            setTimeout(() => { inp.style.transform = ''; }, 150);
+        }
+
+        async function submitVoteDirect(choice) {
+            const cups = document.getElementById('qty').value;
+            const formData = new FormData();
+            formData.append('choice', choice);
+            formData.append('cups', cups);
+
+            try {
+                const response = await fetch('/vote', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const msg = choice === 'si' ? `☕ ¡${cups} taza${cups > 1 ? 's' : ''} anotada${cups > 1 ? 's' : ''}!` : 'Anotado — ¡para la próxima!';
+                    showToast(msg);
+                    bump(choice === 'si' ? 'score-tazas' : 'score-pasan');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (e) {
+                showToast('Error al enviar voto');
+            }
+        }
+
+        function bump(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('bump');
+            setTimeout(() => el.classList.remove('bump'), 400);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2600);
+        }
+
+        function updateValidity() {
+            const lastReset = "{{ votes.last_reset }}";
+            if (!lastReset) return;
+            
+            const resetDate = new Date(lastReset);
+            const now = new Date();
+            const diffMs = (resetDate.getTime() + (24 * 60 * 60 * 1000)) - now.getTime();
+            const diffHours = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)));
+            
+            document.getElementById('validity-text').textContent = `${diffHours}h restantes`;
+            const percent = Math.max(0, (diffMs / (24 * 60 * 60 * 1000)) * 100);
+            document.getElementById('validity-bar').style.width = `${percent}%`;
+        }
+
+        setInterval(updateValidity, 60000);
+        updateValidity();
+    </script>
 </body>
 </html>
