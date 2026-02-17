@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién quiere café? ☕</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body { text-align: center; padding: 2rem; }
+        .stats { font-size: 2.5rem; margin: 2rem 0; }
+        .voter-list { text-align: left; max-width: 400px; margin: auto; }
+        .si { color: #44eb44; }
+        .no { color: #ff4444; }
+        .cups-input { font-size: 1.5rem; width: 80px; text-align: center; display: inline-block; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>☕ ¿Cuántas tazas pedimos?</h1>
+        <p>Votos válidos por 24 horas.</p>
+
+        <div class="stats">
+            <span class="si">TAZAS: {{ votes.si }}</span> | 
+            <span class="no">PASAN: {{ votes.no }}</span>
+        </div>
+
+        <form action="/vote" method="POST">
+            <div style="margin-bottom: 1rem;">
+                <label for="cups">¿Cuántas tazas quieres?</label>
+                <input type="number" name="cups" value="1" min="1" max="10" class="cups-input">
+            </div>
+            <div class="grid">
+                <button type="submit" name="choice" value="si" class="contrast">¡Marchando! ☕</button>
+                <button type="submit" name="choice" value="no" class="secondary">Hoy no... ❌</button>
+            </div>
+        </form>
+
+        <hr>
+        <div class="voter-list">
+            <h3>Actividad reciente:</h3>
+            <ul>
+                {% for voter in votes.voters[::-1][:15] %}
+                <li>
+                    [{{ voter.time }}] 
+                    {% if voter.choice == 'si' %}
+                    ☕ Pidió <strong>{{ voter.cups }}</strong> {{ 'taza' if voter.cups == 1 else 'tazas' }}
+                    {% else %}
+                    ❌ Paso por esta vez
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+</body>
+</html>
