@@ -3,54 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¿Quién quiere café? ☕</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <title>☕ La Ronda del Café</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body { text-align: center; padding: 2rem; }
-        .stats { font-size: 2.5rem; margin: 2rem 0; }
-        .voter-list { text-align: left; max-width: 400px; margin: auto; }
-        .si { color: #44eb44; }
-        .no { color: #ff4444; }
-        .cups-input { font-size: 1.5rem; width: 80px; text-align: center; display: inline-block; }
+        :root {
+            --cream: #f5efe6;
+            --espresso: #1a0f07;
+            --caramel: #c8854a;
+            --gold: #d4a853;
+            --foam: #ede0cc;
+            --dark-roast: #2d1a0e;
+            --steam: rgba(245, 239, 230, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--espresso);
+            font-family: 'Cormorant Garamond', serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Grain texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.35;
+        }
+
+        /* Warm radial background */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 20%, #3d1f0a 0%, var(--espresso) 70%);
+            pointer-events: none;
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px 80px;
+        }
+
+        /* Steam animation */
+        .steam-container {
+            position: relative;
+            margin-bottom: 8px;
+            height: 60px;
+            width: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .steam {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            border-radius: 50%;
+            background: linear-gradient(to top, rgba(245,239,230,0.5), transparent);
+            animation: steam-rise 2.5s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        .steam:nth-child(1) { left: 30%; height: 40px; animation-delay: 0s; }
+        .steam:nth-child(2) { left: 50%; height: 55px; animation-delay: 0.5s; }
+        .steam:nth-child(3) { left: 70%; height: 35px; animation-delay: 1s; }
+
+        @keyframes steam-rise {
+            0% { opacity: 0; transform: translateY(0) scaleX(1); }
+            30% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-50px) scaleX(2); }
+        }
+
+        .cup-icon {
+            font-size: 56px;
+            filter: drop-shadow(0 8px 24px rgba(200,133,74,0.4));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 400;
+            color: var(--cream);
+            letter-spacing: 0.02em;
+            text-align: center;
+            margin-bottom: 8px;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        h1 em { font-style: italic; color: var(--gold); }
+
+        .subtitle {
+            font-size: 1rem;
+            color: rgba(245,239,230,0.4);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            margin-bottom: 52px;
+            animation: fadeUp 0.8s 0.1s ease both;
+        }
+
+        /* Divider */
+        .divider {
+            width: 100%;
+            max-width: 480px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--caramel), transparent);
+            margin-bottom: 40px;
+            animation: fadeIn 1s 0.3s ease both;
+        }
+
+        /* Score board */
+        .scoreboard {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 48px;
+            animation: fadeUp 0.8s 0.2s ease both;
+        }
+
+        .score-item { text-align: center; }
+
+        .score-val {
+            display: block;
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--cream);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .score-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--caramel);
+        }
+
+        .score-sep {
+            width: 1px;
+            height: 40px;
+            background: rgba(245,239,230,0.1);
+        }
+
+        /* Form section */
+        .voting-section {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeUp 0.8s 0.4s ease both;
+        }
+
+        .input-group {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(245, 239, 230, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .label {
+            display: block;
+            color: var(--gold);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .cups-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        input[type="number"] {
+            background: transparent;
+            border: none;
+            color: var(--cream);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            width: 60px;
+            text-align: center;
+            outline: none;
+        }
+
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 18px 24px;
+            border-radius: 10px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-order {
+            background: var(--caramel);
+            border: 1px solid var(--caramel);
+            color: var(--espresso);
+        }
+
+        .btn-order:hover {
+            background: transparent;
+            color: var(--caramel);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(200,133,74,0.2);
+        }
+
+        .btn-pass {
+            background: transparent;
+            border: 1px solid rgba(245,239,230,0.2);
+            color: rgba(245,239,230,0.6);
+        }
+
+        .btn-pass:hover {
+            border-color: var(--cream);
+            color: var(--cream);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Activity section */
+        .activity-section {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 80px;
+            animation: fadeIn 1.2s 0.6s ease both;
+        }
+
+        .activity-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-style: italic;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(245,239,230,0.05);
+            font-size: 1.05rem;
+        }
+
+        .time {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(245,239,230,0.3);
+        }
+
+        .msg { color: var(--foam); }
+        .msg strong { color: var(--gold); }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <main class="container">
-        <h1>☕ ¿Cuántas tazas pedimos?</h1>
-        <p>Votos válidos por 24 horas.</p>
-
-        <div class="stats">
-            <span class="si">TAZAS: {{ votes.si }}</span> | 
-            <span class="no">PASAN: {{ votes.no }}</span>
+    <div class="wrapper">
+        <div class="steam-container">
+            <div class="steam"></div>
+            <div class="steam"></div>
+            <div class="steam"></div>
+            <div class="cup-icon">☕</div>
         </div>
 
-        <form action="/vote" method="POST">
-            <div style="margin-bottom: 1rem;">
-                <label for="cups">¿Cuántas tazas quieres?</label>
-                <input type="number" name="cups" value="1" min="1" max="10" class="cups-input">
+        <h1>La Ronda del <em>Café</em></h1>
+        <p class="subtitle">Sincronía & Cafeína</p>
+
+        <div class="divider"></div>
+
+        <div class="scoreboard">
+            <div class="score-item">
+                <span class="score-val">{{ votes.si }}</span>
+                <span class="score-label">Tazas</span>
             </div>
-            <div class="grid">
-                <button type="submit" name="choice" value="si" class="contrast">¡Marchando! ☕</button>
-                <button type="submit" name="choice" value="no" class="secondary">Hoy no... ❌</button>
+            <div class="score-sep"></div>
+            <div class="score-item">
+                <span class="score-val">{{ votes.no }}</span>
+                <span class="score-label">Pasaron</span>
+            </div>
+        </div>
+
+        <form class="voting-section" action="/vote" method="POST">
+            <div class="input-group">
+                <label class="label">Dosis deseada</label>
+                <div class="cups-selector">
+                    <input type="number" name="cups" value="1" min="1" max="10">
+                </div>
+            </div>
+            <div class="btn-grid">
+                <button type="submit" name="choice" value="si" class="btn-order">¡Marchando!</button>
+                <button type="submit" name="choice" value="no" class="btn-pass">Paso</button>
             </div>
         </form>
 
-        <hr>
-        <div class="voter-list">
-            <h3>Actividad reciente:</h3>
-            <ul>
+        <div class="activity-section">
+            <h3 class="activity-title">Recientemente en la barra...</h3>
+            <ul class="activity-list">
                 {% for voter in votes.voters[::-1][:15] %}
-                <li>
-                    [{{ voter.time }}] 
-                    {% if voter.choice == 'si' %}
-                    ☕ Pidió <strong>{{ voter.cups }}</strong> {{ 'taza' if voter.cups == 1 else 'tazas' }}
-                    {% else %}
-                    ❌ Paso por esta vez
-                    {% endif %}
+                <li class="activity-item">
+                    <span class="msg">
+                        {% if voter.choice == 'si' %}
+                        Sirviendo <strong>{{ voter.cups }}</strong> {{ 'taza' if voter.cups == 1 else 'tazas' }}
+                        {% else %}
+                        Declinó la ronda
+                        {% endif %}
+                    </span>
+                    <span class="time">{{ voter.time }}</span>
                 </li>
                 {% endfor %}
             </ul>
         </div>
-    </main>
+    </div>
 </body>
 </html>
